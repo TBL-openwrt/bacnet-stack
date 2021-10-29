@@ -30,7 +30,8 @@
 #include <errno.h>
 #include <time.h>       /* for time */
 
-#define PRINT_ENABLED 1
+#define PRINT_ENABLED       1
+#define MAX_ACK_STRING      512
 
 #include "bacdef.h"
 #include "config.h"
@@ -67,6 +68,61 @@ static int32_t Target_Object_Index = BACNET_ARRAY_ALL;
 static uint8_t Request_Invoke_ID = 0;
 static BACNET_ADDRESS Target_Address;
 static bool Error_Detected = false;
+
+static void processRead(BACNET_READ_PROPERTY_DATA* data)
+{
+	char ackString[MAX_ACK_STRING] = "";
+    char *pAckString = &ackString[0];
+    BACNET_OBJECT_PROPERTY_VALUE object_value;  /* for bacapp printing */
+    BACNET_APPLICATION_DATA_VALUE value;        /* for decode value data */
+    int len = 0;
+    uint8_t *application_data;
+    int application_data_len;
+    bool first_value = true;
+    bool print_brace = false;
+
+    if (data) {
+        application_data = data->application_data;
+        application_data_len = data->application_data_len;
+        /* FIXME: what if application_data_len is bigger than 255? */
+        /* value? need to loop until all of the len is gone... */
+        for (;;) {
+            len =
+                bacapp_decode_application_data(application_data,
+                (uint8_t) application_data_len, &value);
+            if (first_value && (len < application_data_len)) {
+                first_value = false;
+                strncat(pAckString, "{", 1);
+                pAckString += 1;
+                print_brace = true;
+            }
+            object_value.object_type = data->object_type;
+            object_value.object_instance = data->object_instance;
+            object_value.object_property = data->object_property;
+            object_value.array_index = data->array_index;
+            object_value.value = &value;
+            bacapp_snprintf_value(pAckString,
+                MAX_ACK_STRING - (pAckString - ackString), &object_value);
+            if (len > 0) {
+                if (len < application_data_len) {
+                    application_data += len;
+                    application_data_len -= len;
+                    /* there's more! */
+                    strncat(pAckString, ",", 1);
+                    pAckString += 1;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        if (print_brace) {
+            strncat(pAckString, "}", 1);
+            pAckString += 1;
+        }
+    }
+}
 
 static void MyErrorHandler(
     BACNET_ADDRESS * src,
@@ -135,6 +191,7 @@ void My_Read_Property_Ack_Handler(
         (service_data->invoke_id == Request_Invoke_ID)) {
         len =
             rp_ack_decode_service_request(service_request, service_len, &data);
+			processRead(&data);
         if (len < 0) {
             printf("<decode failed!>\n");
         } else {
