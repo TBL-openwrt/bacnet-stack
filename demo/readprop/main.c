@@ -80,6 +80,7 @@ static void processRead(BACNET_READ_PROPERTY_DATA* data)
     int application_data_len;
     bool first_value = true;
     bool print_brace = false;
+    FILE *fp;
 
     if (data) {
         application_data = data->application_data;
@@ -121,6 +122,10 @@ static void processRead(BACNET_READ_PROPERTY_DATA* data)
             strncat(pAckString, "}", 1);
             pAckString += 1;
         }
+        //Now report to a shared file
+        fp = fopen("/tmp/bacnetio.txt", "w+");
+        fprintf(fp, "%s", pAckString);
+        fclose(fp);
     }
 }
 
