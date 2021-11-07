@@ -86,7 +86,7 @@ static int RS485_Handle = -1;
 static unsigned int RS485_Baud = B38400;
 /* serial port name, /dev/ttyS0,
   /dev/ttyUSB0 for USB->RS485 from B&B Electronics USOPTL4 */
-static char *RS485_Port_Name = "/dev/ttyUSB0";
+static char *RS485_Port_Name = "/dev/ttyAMA0";
 /* some terminal I/O have RS-485 specific functionality */
 #ifndef RS485MOD
 #define RS485MOD 0
@@ -97,6 +97,14 @@ static struct termios RS485_oldtio;
 static struct serial_struct RS485_oldserial;
 /* indicator of special baud rate */
 static bool RS485_SpecBaud = false;
+
+/*RS485 parity strings*/
+static char oddstr[]  = "ODD";
+static char evenstr[] = "EVEN";
+static char nonestr[] = "NONE";
+
+/*Parity flags for RS485 port*/
+static tcflag_t RS485_parity_flags = 0;
 
 /* Ring buffer for incoming bytes, in order to speed up the receiving. */
 static FIFO_BUFFER Rx_FIFO;
@@ -130,6 +138,46 @@ const char *RS485_Interface(
     void)
 {
     return RS485_Port_Name;
+}
+
+/*********************************************************************
+* DESCRIPTION: Set parity for the interface port
+* RETURN:      none
+* ALGORITHM:   none
+* NOTES:       none
+*********************************************************************/
+void RS485_Set_Parity(char* rs485_parity)
+{
+    if(0u != strncmp(evenstr, rs485_parity, sizeof(evenstr))){
+        RS485_parity_flags |= PARENB; 
+    }
+    else if(0u != strncmp(oddstr, rs485_parity, sizeof(oddstr))){
+        RS485_parity_flags |= (PARENB | PARODD);
+    }
+    else{
+        RS485_parity_flags = 0;
+    }
+}
+
+/*********************************************************************
+* DESCRIPTION: Get parity for the interface port
+* RETURN:      none
+* ALGORITHM:   none
+* NOTES:       none
+*********************************************************************/
+char* RS485_Get_Parity(void)
+{
+    char* rc = NULL;
+    if(0 != (RS485_parity_flags & (PARENB | PARODD))){
+        rc = &(oddstr[0]);
+    }
+    else if(0 != (RS485_parity_flags & (PARENB))){
+        rc = &(evenstr[0]);
+    }
+    else{
+        rc = &(nonestr[0]);
+    }
+    return rc;
 }
 
 /****************************************************************************

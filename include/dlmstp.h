@@ -116,6 +116,9 @@ extern "C" {
     bool dlmstp_send_pdu_queue_empty(void);
     bool dlmstp_send_pdu_queue_full(void);
 
+    void dlmsrp_set_parity(
+        char* parity);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

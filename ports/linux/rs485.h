@@ -70,6 +70,8 @@ extern "C" {
     void RS485_Print_Ports(
         void);
 
+    void RS485_Set_Parity(char* rs485_parity);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

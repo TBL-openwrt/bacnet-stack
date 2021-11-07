@@ -881,6 +881,12 @@ void dlmstp_get_broadcast_address(
     return;
 }
 
+void dlmsrp_set_parity(
+        char* parity)
+{
+    RS485_Set_Parity(parity);
+}
+
 bool dlmstp_init(
     void *poPort,
     char *ifname)
