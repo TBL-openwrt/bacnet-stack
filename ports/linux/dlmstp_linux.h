@@ -203,9 +203,6 @@ extern "C" {
     bool dlmstp_sole_master(
         void);
 
-    void dlmsrp_set_parity(
-        char* parity);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

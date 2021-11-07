@@ -308,12 +308,6 @@ void dlenv_init(
     } else {
         dlmstp_set_mac_address(127);
     }
-    pEnv = getenv("BACNET_PARITY");
-    if (pEnv) {
-        dlmstp_set_parity(pEnv);
-    } else {
-        dlmstp_set_mac_address("NONE");
-    }    
 #endif
     pEnv = getenv("BACNET_APDU_TIMEOUT");
     if (pEnv) {

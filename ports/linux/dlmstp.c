@@ -668,12 +668,6 @@ void dlmstp_get_broadcast_address(
     return;
 }
 
-void dlmsrp_set_parity(
-        char* parity)
-{
-    RS485_Set_Parity(parity);
-}
-
 bool dlmstp_init(
     char *ifname)
 {
@@ -719,6 +713,7 @@ bool dlmstp_init(
     fprintf(stderr, "MS/TP MAC: %02X\n", MSTP_Port.This_Station);
     fprintf(stderr, "MS/TP Max_Master: %02X\n", MSTP_Port.Nmax_master);
     fprintf(stderr, "MS/TP Max_Info_Frames: %u\n", MSTP_Port.Nmax_info_frames);
+	fprintf(stderr, "+++\n");
 #endif
     /* start the threads */
     /*    rv = pthread_create(&hThread, NULL, dlmstp_receive_fsm_task, NULL); */
